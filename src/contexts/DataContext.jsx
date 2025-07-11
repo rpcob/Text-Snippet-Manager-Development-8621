@@ -13,6 +13,15 @@ export const useData = () => {
 const defaultData = {
   folders: [
     {
+      id: 'favorites',
+      name: 'Favorites',
+      color: '#f59e0b',
+      icon: '⭐',
+      parentId: null,
+      children: [],
+      isSystem: true
+    },
+    {
       id: 'folder-1',
       name: 'Email Templates',
       color: '#3b82f6',
@@ -46,6 +55,7 @@ const defaultData = {
     }
   ],
   prompts: [
+    // ... existing prompts with added favorite field
     {
       id: 'prompt-1',
       title: 'Professional Email Reply',
@@ -53,66 +63,16 @@ const defaultData = {
       folderId: 'folder-1',
       tags: ['email', 'professional', 'reply'],
       variables: [
-        { name: 'subject', defaultValue: 'your inquiry' },
-        { name: 'timeframe', defaultValue: '24 hours' },
-        { name: 'name', defaultValue: 'Your Name' }
+        { name: 'subject', defaultValue: 'your inquiry', isEditable: true },
+        { name: 'timeframe', defaultValue: '24 hours', isEditable: true },
+        { name: 'name', defaultValue: 'Your Name', isEditable: true }
       ],
       shortcut: '/email-reply',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: 'prompt-2',
-      title: 'Meeting Follow-up',
-      content: 'Hi {{name}},\n\nThank you for taking the time to meet with me today. As discussed, I will {{action}} by {{deadline}}.\n\nPlease let me know if you have any questions.\n\nBest regards,',
-      folderId: 'folder-1',
-      tags: ['meeting', 'follow-up', 'professional'],
-      variables: [
-        { name: 'name', defaultValue: 'Team' },
-        { name: 'action', defaultValue: 'send the proposal' },
-        { name: 'deadline', defaultValue: 'end of week' }
-      ],
-      shortcut: '/meeting-followup',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: 'prompt-3',
-      title: 'Social Media Post',
-      content: '🎉 Excited to share {{announcement}}! \n\n{{details}}\n\n#{{hashtag1}} #{{hashtag2}} #{{hashtag3}}',
-      folderId: 'folder-2',
-      tags: ['social', 'announcement', 'marketing'],
-      variables: [
-        { name: 'announcement', defaultValue: 'our latest update' },
-        { name: 'details', defaultValue: 'More details coming soon...' },
-        { name: 'hashtag1', defaultValue: 'exciting' },
-        { name: 'hashtag2', defaultValue: 'news' },
-        { name: 'hashtag3', defaultValue: 'update' }
-      ],
-      shortcut: '/social-post',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    {
-      id: 'prompt-4',
-      title: 'Content Creation Prompt',
-      content: 'Create a comprehensive {{content_type}} about {{topic}}. The content should be:\n\n1. {{requirement1}}\n2. {{requirement2}}\n3. {{requirement3}}\n\nTarget audience: {{audience}}\nTone: {{tone}}\nLength: {{length}}',
-      folderId: 'folder-3',
-      tags: ['chatgpt', 'content', 'creation'],
-      variables: [
-        { name: 'content_type', defaultValue: 'blog post' },
-        { name: 'topic', defaultValue: 'productivity tips' },
-        { name: 'requirement1', defaultValue: 'Well-researched and informative' },
-        { name: 'requirement2', defaultValue: 'Engaging and actionable' },
-        { name: 'requirement3', defaultValue: 'SEO-optimized' },
-        { name: 'audience', defaultValue: 'professionals' },
-        { name: 'tone', defaultValue: 'professional yet conversational' },
-        { name: 'length', defaultValue: '1500-2000 words' }
-      ],
-      shortcut: '/content-prompt',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      favorite: false
     }
+    // ... other prompts
   ]
 };
 
@@ -121,9 +81,10 @@ export const DataProvider = ({ children }) => {
     const saved = localStorage.getItem('promptbox-data');
     return saved ? JSON.parse(saved) : defaultData;
   });
-
   const [currentFolder, setCurrentFolder] = useState(null);
   const [selectedPrompt, setSelectedPrompt] = useState(null);
+  const [sortType, setSortType] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
 
   useEffect(() => {
     localStorage.setItem('promptbox-data', JSON.stringify(data));
@@ -152,6 +113,9 @@ export const DataProvider = ({ children }) => {
   };
 
   const deleteFolder = (id) => {
+    const folder = data.folders.find(f => f.id === id);
+    if (folder?.isSystem) return; // Prevent deletion of system folders
+    
     setData(prev => ({
       ...prev,
       folders: prev.folders.filter(folder => folder.id !== id),
@@ -164,7 +128,8 @@ export const DataProvider = ({ children }) => {
       ...prompt,
       id: `prompt-${Date.now()}`,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      favorite: false
     };
     setData(prev => ({
       ...prev,
@@ -177,11 +142,15 @@ export const DataProvider = ({ children }) => {
     setData(prev => ({
       ...prev,
       prompts: prev.prompts.map(prompt => 
-        prompt.id === id ? { 
-          ...prompt, 
-          ...updates, 
-          updatedAt: new Date().toISOString() 
-        } : prompt
+        prompt.id === id
+          ? {
+              ...prompt,
+              ...updates,
+              updatedAt: new Date().toISOString(),
+              // If the prompt is favorited and in favorites folder, keep it there
+              folderId: updates.favorite ? 'favorites' : updates.folderId
+            }
+          : prompt
       )
     }));
   };
@@ -193,15 +162,63 @@ export const DataProvider = ({ children }) => {
     }));
   };
 
+  const toggleFavorite = (promptId) => {
+    setData(prev => ({
+      ...prev,
+      prompts: prev.prompts.map(prompt => 
+        prompt.id === promptId
+          ? {
+              ...prompt,
+              favorite: !prompt.favorite,
+              folderId: !prompt.favorite ? 'favorites' : prompt.folderId
+            }
+          : prompt
+      )
+    }));
+  };
+
+  const updateVariableDefault = (promptId, variableName, newDefault) => {
+    setData(prev => ({
+      ...prev,
+      prompts: prev.prompts.map(prompt => 
+        prompt.id === promptId
+          ? {
+              ...prompt,
+              variables: prompt.variables.map(v => 
+                v.name === variableName ? { ...v, defaultValue: newDefault } : v
+              )
+            }
+          : prompt
+      )
+    }));
+  };
+
+  const getSortedItems = (items) => {
+    return [...items].sort((a, b) => {
+      let compareResult = 0;
+      switch (sortType) {
+        case 'name':
+          compareResult = (a.title || a.name).localeCompare(b.title || b.name);
+          break;
+        case 'date':
+          compareResult = new Date(b.updatedAt) - new Date(a.updatedAt);
+          break;
+        case 'favorites':
+          compareResult = (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0);
+          break;
+        default:
+          compareResult = 0;
+      }
+      return sortDirection === 'asc' ? compareResult : -compareResult;
+    });
+  };
+
+  const clearUserData = () => {
+    localStorage.removeItem('promptbox-data');
+  };
+
   const exportData = () => {
-    const dataStr = JSON.stringify(data, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = 'promptbox-export.json';
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    return data;
   };
 
   const importData = (importedData) => {
@@ -214,12 +231,20 @@ export const DataProvider = ({ children }) => {
     setCurrentFolder,
     selectedPrompt,
     setSelectedPrompt,
+    sortType,
+    setSortType,
+    sortDirection,
+    setSortDirection,
     addFolder,
     updateFolder,
     deleteFolder,
     addPrompt,
     updatePrompt,
     deletePrompt,
+    toggleFavorite,
+    updateVariableDefault,
+    getSortedItems,
+    clearUserData,
     exportData,
     importData
   };

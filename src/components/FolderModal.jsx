@@ -16,7 +16,7 @@ const iconOptions = [
   '📊', '🎨', '🔧', '📋', '🌟', '🎪', '🎭', '🎨', '🎯', '🔥'
 ];
 
-const FolderModal = ({ isOpen, onClose, folder }) => {
+const FolderModal = ({ isOpen, onClose, folder, isMobile }) => {
   const { addFolder, updateFolder } = useData();
   const [formData, setFormData] = useState({
     name: '',
@@ -70,12 +70,14 @@ const FolderModal = ({ isOpen, onClose, folder }) => {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white dark:bg-dark-800 rounded-lg shadow-xl max-w-md w-full"
+          className={`bg-white dark:bg-dark-800 rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto ${
+            isMobile ? 'max-w-full' : 'max-w-md'
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 border-b border-gray-200 dark:border-dark-700">
+          <div className="p-4 md:p-6 border-b border-gray-200 dark:border-dark-700">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
                 {folder ? 'Edit Folder' : 'Create New Folder'}
               </h2>
               <motion.button
@@ -89,7 +91,7 @@ const FolderModal = ({ isOpen, onClose, folder }) => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-6">
             {/* Preview */}
             <div className="flex items-center justify-center">
               <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-dark-700 rounded-lg">
@@ -117,7 +119,7 @@ const FolderModal = ({ isOpen, onClose, folder }) => {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="Enter folder name..."
                 required
               />
@@ -128,7 +130,7 @@ const FolderModal = ({ isOpen, onClose, folder }) => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Icon
               </label>
-              <div className="grid grid-cols-10 gap-2">
+              <div className={`grid gap-2 ${isMobile ? 'grid-cols-8' : 'grid-cols-10'}`}>
                 {iconOptions.map((icon) => (
                   <motion.button
                     key={icon}
@@ -153,7 +155,7 @@ const FolderModal = ({ isOpen, onClose, folder }) => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Color
               </label>
-              <div className="grid grid-cols-10 gap-2">
+              <div className={`grid gap-2 ${isMobile ? 'grid-cols-8' : 'grid-cols-10'}`}>
                 {colorOptions.map((color) => (
                   <motion.button
                     key={color}
@@ -173,13 +175,13 @@ const FolderModal = ({ isOpen, onClose, folder }) => {
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-dark-700">
+            <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200 dark:border-dark-700">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-dark-700 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-dark-700 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors"
               >
                 Cancel
               </motion.button>
@@ -187,7 +189,7 @@ const FolderModal = ({ isOpen, onClose, folder }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="flex items-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
               >
                 <SafeIcon icon={FiSave} className="w-4 h-4" />
                 <span>{folder ? 'Update' : 'Create'}</span>

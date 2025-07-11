@@ -6,7 +6,7 @@ import { useData } from '../contexts/DataContext';
 
 const { FiX, FiPlus, FiTrash2, FiSave } = FiIcons;
 
-const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
+const PromptModal = ({ isOpen, onClose, prompt, folderId, isMobile }) => {
   const { data, addPrompt, updatePrompt } = useData();
   const [formData, setFormData] = useState({
     title: '',
@@ -102,12 +102,14 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white dark:bg-dark-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          className={`bg-white dark:bg-dark-800 rounded-lg shadow-xl w-full max-h-[90vh] overflow-y-auto ${
+            isMobile ? 'max-w-full' : 'max-w-2xl'
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 border-b border-gray-200 dark:border-dark-700">
+          <div className="p-4 md:p-6 border-b border-gray-200 dark:border-dark-700">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
                 {prompt ? 'Edit Prompt' : 'Create New Prompt'}
               </h2>
               <motion.button
@@ -121,7 +123,7 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-6">
             {/* Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -131,7 +133,7 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="Enter prompt title..."
                 required
               />
@@ -145,7 +147,7 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
               <select
                 value={formData.folderId}
                 onChange={(e) => setFormData(prev => ({ ...prev, folderId: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               >
                 <option value="">Select a folder</option>
                 {data.folders.map(folder => (
@@ -164,8 +166,8 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
               <textarea
                 value={formData.content}
                 onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                rows={8}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                rows={isMobile ? 6 : 8}
+                className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="Enter your prompt content... Use {{variable}} for variables"
                 required
               />
@@ -180,7 +182,7 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
                 type="text"
                 value={formData.shortcut}
                 onChange={(e) => setFormData(prev => ({ ...prev, shortcut: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="/my-shortcut"
               />
             </div>
@@ -213,7 +215,7 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="flex-1 px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="Add a tag..."
                 />
                 <motion.button
@@ -240,32 +242,32 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
                       {`{{${variable.name}}}`}
                     </span>
                     <span className="text-sm text-gray-600 dark:text-gray-400">→</span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 truncate">
                       {variable.defaultValue}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeVariable(index)}
-                      className="ml-auto text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 p-1"
                     >
                       <SafeIcon icon={FiTrash2} className="w-4 h-4" />
                     </button>
                   </div>
                 ))}
               </div>
-              <div className="flex space-x-2">
+              <div className="space-y-2 md:space-y-0 md:flex md:space-x-2">
                 <input
                   type="text"
                   value={newVariable.name}
                   onChange={(e) => setNewVariable(prev => ({ ...prev, name: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full md:flex-1 px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="Variable name..."
                 />
                 <input
                   type="text"
                   value={newVariable.defaultValue}
                   onChange={(e) => setNewVariable(prev => ({ ...prev, defaultValue: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full md:flex-1 px-3 py-2 text-sm md:text-base border border-gray-300 dark:border-dark-600 rounded-lg bg-white dark:bg-dark-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   placeholder="Default value..."
                 />
                 <motion.button
@@ -273,7 +275,7 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
                   whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={addVariable}
-                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                  className="w-full md:w-auto px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
                 >
                   <SafeIcon icon={FiPlus} className="w-4 h-4" />
                 </motion.button>
@@ -281,13 +283,13 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-dark-700">
+            <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 border-t border-gray-200 dark:border-dark-700">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-dark-700 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-dark-700 rounded-lg hover:bg-gray-200 dark:hover:bg-dark-600 transition-colors"
               >
                 Cancel
               </motion.button>
@@ -295,7 +297,7 @@ const PromptModal = ({ isOpen, onClose, prompt, folderId }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 type="submit"
-                className="flex items-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                className="w-full sm:w-auto flex items-center justify-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
               >
                 <SafeIcon icon={FiSave} className="w-4 h-4" />
                 <span>{prompt ? 'Update' : 'Create'}</span>

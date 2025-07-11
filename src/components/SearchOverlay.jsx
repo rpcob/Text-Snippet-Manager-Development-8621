@@ -7,7 +7,7 @@ import Fuse from 'fuse.js';
 
 const { FiSearch, FiX, FiCopy, FiFolder, FiCommand } = FiIcons;
 
-const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables }) => {
+const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables, isMobile }) => {
   const { data } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState([]);
@@ -60,10 +60,8 @@ const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables }) => {
 
   const handleSelectResult = (result) => {
     if (result.title) {
-      // It's a prompt
       onCopyWithVariables(result);
     } else {
-      // It's a folder - could navigate to it
       console.log('Navigate to folder:', result.name);
     }
     onClose();
@@ -77,14 +75,18 @@ const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center pt-20"
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center ${
+          isMobile ? 'pt-4 px-4' : 'pt-20'
+        }`}
         onClick={onClose}
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: -20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: -20 }}
-          className="bg-white dark:bg-dark-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[70vh] overflow-hidden"
+          className={`bg-white dark:bg-dark-800 rounded-lg shadow-xl w-full max-h-[80vh] overflow-hidden ${
+            isMobile ? 'max-w-full' : 'max-w-2xl mx-4'
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Search Input */}
@@ -97,7 +99,9 @@ const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables }) => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full pl-10 pr-12 py-3 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-lg focus:outline-none"
+                className={`w-full pl-10 pr-12 py-3 bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none ${
+                  isMobile ? 'text-base' : 'text-lg'
+                }`}
                 placeholder="Search prompts and folders..."
               />
               <motion.button
@@ -118,7 +122,7 @@ const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables }) => {
                 <div className="w-16 h-16 bg-gray-100 dark:bg-dark-700 rounded-full flex items-center justify-center mx-auto mb-4">
                   <SafeIcon icon={FiSearch} className="w-8 h-8 text-gray-400" />
                 </div>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
                   {searchTerm ? 'No results found' : 'Start typing to search...'}
                 </p>
               </div>
@@ -139,21 +143,20 @@ const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables }) => {
                   >
                     <div className="flex items-center space-x-3">
                       {result.title ? (
-                        // Prompt result
                         <>
-                          <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center">
+                          <div className="w-8 h-8 bg-primary-100 dark:bg-primary-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
                             <SafeIcon icon={FiCommand} className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900 dark:text-white">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-gray-900 dark:text-white text-sm md:text-base truncate">
                               {result.title}
                             </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                              {result.content.substring(0, 100)}...
+                            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate">
+                              {result.content.substring(0, isMobile ? 60 : 100)}...
                             </p>
                             {result.tags.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-1">
-                                {result.tags.slice(0, 3).map(tag => (
+                                {result.tags.slice(0, isMobile ? 2 : 3).map(tag => (
                                   <span
                                     key={tag}
                                     className="px-2 py-0.5 bg-gray-100 dark:bg-dark-700 text-gray-600 dark:text-gray-400 text-xs rounded-full"
@@ -164,31 +167,30 @@ const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables }) => {
                               </div>
                             )}
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <SafeIcon icon={FiCopy} className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs text-gray-400">Copy</span>
+                          <div className="flex items-center space-x-1 text-xs text-gray-400">
+                            <SafeIcon icon={FiCopy} className="w-4 h-4" />
+                            {!isMobile && <span>Copy</span>}
                           </div>
                         </>
                       ) : (
-                        // Folder result
                         <>
                           <div 
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm"
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm flex-shrink-0"
                             style={{ backgroundColor: result.color }}
                           >
                             {result.icon}
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900 dark:text-white">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-gray-900 dark:text-white text-sm md:text-base truncate">
                               {result.name}
                             </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400">
                               {data.prompts.filter(p => p.folderId === result.id).length} prompts
                             </p>
                           </div>
-                          <div className="flex items-center space-x-2">
-                            <SafeIcon icon={FiFolder} className="w-4 h-4 text-gray-400" />
-                            <span className="text-xs text-gray-400">Folder</span>
+                          <div className="flex items-center space-x-1 text-xs text-gray-400">
+                            <SafeIcon icon={FiFolder} className="w-4 h-4" />
+                            {!isMobile && <span>Folder</span>}
                           </div>
                         </>
                       )}
@@ -200,24 +202,26 @@ const SearchOverlay = ({ isOpen, onClose, onCopyWithVariables }) => {
           </div>
 
           {/* Footer */}
-          <div className="p-3 border-t border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-700">
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-              <div className="flex items-center space-x-4">
+          {!isMobile && (
+            <div className="p-3 border-t border-gray-200 dark:border-dark-700 bg-gray-50 dark:bg-dark-700">
+              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center space-x-4">
+                  <span className="flex items-center space-x-1">
+                    <kbd className="px-2 py-1 bg-white dark:bg-dark-800 rounded border">↵</kbd>
+                    <span>to select</span>
+                  </span>
+                  <span className="flex items-center space-x-1">
+                    <kbd className="px-2 py-1 bg-white dark:bg-dark-800 rounded border">↑↓</kbd>
+                    <span>to navigate</span>
+                  </span>
+                </div>
                 <span className="flex items-center space-x-1">
-                  <kbd className="px-2 py-1 bg-white dark:bg-dark-800 rounded border">↵</kbd>
-                  <span>to select</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <kbd className="px-2 py-1 bg-white dark:bg-dark-800 rounded border">↑↓</kbd>
-                  <span>to navigate</span>
+                  <kbd className="px-2 py-1 bg-white dark:bg-dark-800 rounded border">esc</kbd>
+                  <span>to close</span>
                 </span>
               </div>
-              <span className="flex items-center space-x-1">
-                <kbd className="px-2 py-1 bg-white dark:bg-dark-800 rounded border">esc</kbd>
-                <span>to close</span>
-              </span>
             </div>
-          </div>
+          )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

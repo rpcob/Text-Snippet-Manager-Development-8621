@@ -33,6 +33,29 @@
   background: #64748b;
 }
 
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .app {
+    font-size: 14px;
+  }
+  
+  /* Improve touch targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .space-y-3 > * + * {
+    margin-top: 0.75rem;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px;
+  }
+}
+
 /* Animations */
 @keyframes slideIn {
   from {
@@ -60,6 +83,35 @@
   outline-offset: 2px;
 }
 
+/* Touch-friendly hover states */
+@media (hover: hover) {
+  .hover\:scale-105:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* Safe area for mobile devices */
+@supports (padding: max(0px)) {
+  .safe-area-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Gradient backgrounds */
 .gradient-bg {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -71,4 +123,27 @@
 
 .gradient-bg-3 {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Reduce padding on mobile */
+  .p-6 {
+    padding: 1rem;
+  }
+  
+  .p-4 {
+    padding: 0.75rem;
+  }
+  
+  /* Better modal sizing */
+  .modal-mobile {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+  
+  /* Improve button spacing */
+  .space-x-2 > * + * {
+    margin-left: 0.5rem;
+  }
 }
